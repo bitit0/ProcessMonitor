@@ -7,6 +7,7 @@ public class ProcessTreeNode : INotifyPropertyChanged
 {
     private bool _isExpanded = true;
     private bool _hasChildren;
+    private bool _isSearchMatch = true;
 
     public ProcessViewModel Vm { get; }
     public int Depth { get; internal set; }
@@ -25,16 +26,23 @@ public class ProcessTreeNode : INotifyPropertyChanged
         internal set { _hasChildren = value; OnPropertyChanged(); }
     }
 
+    public bool IsSearchMatch
+    {
+        get => _isSearchMatch;
+        set { if (_isSearchMatch == value) return; _isSearchMatch = value; OnPropertyChanged(); }
+    }
+
     // Forwarded for DataGrid row-style triggers
     public bool IsNew => Vm.IsNew;
     public bool IsTerminated => Vm.IsTerminated;
+    public bool IsSpike => Vm.IsSpike;
 
     public ProcessTreeNode(ProcessViewModel vm)
     {
         Vm = vm;
         vm.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName is nameof(IsNew) or nameof(IsTerminated))
+            if (e.PropertyName is nameof(IsNew) or nameof(IsTerminated) or nameof(IsSpike))
                 OnPropertyChanged(e.PropertyName);
         };
     }

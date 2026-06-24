@@ -23,7 +23,9 @@ public static class DiffEngine
             }
             else
             {
-                snapshot.CpuPercent = ComputeCpuPercent(prev, snapshot);
+                snapshot.CpuPercent  = ComputeCpuPercent(prev, snapshot);
+                snapshot.DiskReadBps  = ComputeDeltaBps(prev.TotalDiskReadBytes,  snapshot.TotalDiskReadBytes,  prev, snapshot);
+                snapshot.DiskWriteBps = ComputeDeltaBps(prev.TotalDiskWriteBytes, snapshot.TotalDiskWriteBytes, prev, snapshot);
                 updated.Add(snapshot);
             }
         }
@@ -45,11 +47,18 @@ public static class DiffEngine
 
     private static double ComputeCpuPercent(ProcessSnapshot prev, ProcessSnapshot current)
     {
-        var cpuDelta = (current.TotalProcessorTime - prev.TotalProcessorTime).TotalMilliseconds;
+        var cpuDelta  = (current.TotalProcessorTime - prev.TotalProcessorTime).TotalMilliseconds;
         var timeDelta = (current.ProcessorTimeSample - prev.ProcessorTimeSample).TotalMilliseconds;
-
         if (timeDelta <= 0) return 0;
-
         return Math.Round(cpuDelta / timeDelta / Environment.ProcessorCount * 100, 1);
+    }
+
+    private static double ComputeDeltaBps(ulong prevBytes, ulong currBytes,
+        ProcessSnapshot prev, ProcessSnapshot current)
+    {
+        if (currBytes < prevBytes) return 0; // counter reset or new process
+        double secs = (current.ProcessorTimeSample - prev.ProcessorTimeSample).TotalSeconds;
+        if (secs <= 0) return 0;
+        return (currBytes - prevBytes) / secs;
     }
 }

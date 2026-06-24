@@ -17,6 +17,17 @@ public static class SnapshotCollector
         public nint InheritedFromUniqueProcessId;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    private struct IO_COUNTERS
+    {
+        public ulong ReadOperationCount;
+        public ulong WriteOperationCount;
+        public ulong OtherOperationCount;
+        public ulong ReadTransferCount;
+        public ulong WriteTransferCount;
+        public ulong OtherTransferCount;
+    }
+
     [DllImport("ntdll.dll")]
     private static extern int NtQueryInformationProcess(
         nint processHandle,
@@ -24,6 +35,9 @@ public static class SnapshotCollector
         ref ProcessBasicInformation processInformation,
         int processInformationLength,
         out int returnLength);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool GetProcessIoCounters(nint hProcess, out IO_COUNTERS counters);
 
     public static ProcessSnapshot[] Collect()
     {
@@ -46,8 +60,26 @@ public static class SnapshotCollector
                     ProcessorTimeSample = now,
                 };
 
+                try { snapshot.StartTime = p.StartTime.ToUniversalTime(); }
+                catch { /* access denied for system processes — StartTime stays MinValue */ }
+
                 try { snapshot.FullPath = p.MainModule?.FileName ?? string.Empty; }
                 catch { /* access denied on path is non-fatal */ }
+
+                try { snapshot.ThreadCount = p.Threads.Count; } catch { }
+                try { snapshot.HandleCount = p.HandleCount; } catch { }
+                try { snapshot.IsResponding = p.MainWindowHandle == IntPtr.Zero || p.Responding; }
+                catch { snapshot.IsResponding = true; }
+
+                try
+                {
+                    if (GetProcessIoCounters(p.Handle, out var io))
+                    {
+                        snapshot.TotalDiskReadBytes  = io.ReadTransferCount;
+                        snapshot.TotalDiskWriteBytes = io.WriteTransferCount;
+                    }
+                }
+                catch { }
 
                 snapshots.Add(snapshot);
             }

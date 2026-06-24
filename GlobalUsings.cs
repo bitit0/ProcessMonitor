@@ -1,0 +1,16 @@
+// Disambiguate WPF vs WinForms types brought in by UseWindowsForms=true
+global using Application       = System.Windows.Application;
+global using Brush             = System.Windows.Media.Brush;
+global using Clipboard         = System.Windows.Clipboard;
+global using Color             = System.Windows.Media.Color;
+global using FontFamily        = System.Windows.Media.FontFamily;
+global using KeyEventArgs      = System.Windows.Input.KeyEventArgs;
+global using MessageBox        = System.Windows.MessageBox;
+global using MessageBoxButton  = System.Windows.MessageBoxButton;
+global using MessageBoxImage   = System.Windows.MessageBoxImage;
+global using MessageBoxResult  = System.Windows.MessageBoxResult;
+global using MenuItem          = System.Windows.Controls.MenuItem;
+global using Point             = System.Windows.Point;
+global using Rectangle         = System.Windows.Shapes.Rectangle;
+global using SaveFileDialog    = Microsoft.Win32.SaveFileDialog;
+global using UserControl       = System.Windows.Controls.UserControl;

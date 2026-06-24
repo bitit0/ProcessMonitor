@@ -6,28 +6,41 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="8"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- CPU Chart -->
         <Grid Grid.Row="0" Margin="16,12,16,4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="28"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                 <TextBlock Text="CPU Usage" FontSize="13" FontWeight="SemiBold"
                            Foreground="{DynamicResource PrimaryForeground}"/>
                 <TextBlock x:Name="CpuCurrentLabel" FontSize="13"
                            Foreground="{DynamicResource SecondaryForeground}" Margin="8,0,0,0"/>
+                <TextBlock x:Name="CpuGhzLabel" FontSize="13"
+                           Foreground="{DynamicResource MutedForeground}" Margin="10,0,0,0"/>
+                <TextBlock x:Name="CpuTempLabel" FontSize="13"
+                           Foreground="{DynamicResource MutedForeground}" Margin="10,0,0,0"/>
             </StackPanel>
-            <Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}"
+            <Canvas x:Name="CoreCanvas" Grid.Row="1" Margin="50,0,0,4" ClipToBounds="True"
+                    SizeChanged="Canvas_SizeChanged"/>
+            <Border Grid.Row="2" Background="{DynamicResource SurfaceBackground}"
                     BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="4">
                 <Canvas x:Name="CpuCanvas" ClipToBounds="True" SizeChanged="Canvas_SizeChanged"/>
             </Border>
         </Grid>
 
         <!-- Memory Chart -->
-        <Grid Grid.Row="2" Margin="16,4,16,12">
+        <Grid Grid.Row="2" Margin="16,4,16,4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -37,11 +50,70 @@
                            Foreground="{DynamicResource PrimaryForeground}"/>
                 <TextBlock x:Name="MemCurrentLabel" FontSize="13"
                            Foreground="{DynamicResource SecondaryForeground}" Margin="8,0,0,0"/>
+                <TextBlock x:Name="MemRamInfoLabel" FontSize="13"
+                           Foreground="{DynamicResource MutedForeground}" Margin="10,0,0,0"/>
             </StackPanel>
             <Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}"
                     BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="4">
                 <Canvas x:Name="MemCanvas" ClipToBounds="True" SizeChanged="Canvas_SizeChanged"/>
             </Border>
         </Grid>
+
+        <!-- Disk Chart -->
+        <Grid Grid.Row="4" Margin="16,4,16,4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Disk I/O" FontSize="13" FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryForeground}"/>
+                <TextBlock x:Name="DiskCurrentLabel" FontSize="13"
+                           Foreground="{DynamicResource SecondaryForeground}" Margin="8,0,0,0"/>
+            </StackPanel>
+            <Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}"
+                    BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="4">
+                <Canvas x:Name="DiskCanvas" ClipToBounds="True" SizeChanged="Canvas_SizeChanged"/>
+            </Border>
+        </Grid>
+
+        <!-- Network Chart -->
+        <Grid Grid.Row="6" Margin="16,4,16,4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Network" FontSize="13" FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryForeground}"/>
+                <TextBlock x:Name="NetCurrentLabel" FontSize="13"
+                           Foreground="{DynamicResource SecondaryForeground}" Margin="8,0,0,0"/>
+            </StackPanel>
+            <Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}"
+                    BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="4">
+                <Canvas x:Name="NetCanvas" ClipToBounds="True" SizeChanged="Canvas_SizeChanged"/>
+            </Border>
+        </Grid>
+
+        <!-- GPU Chart -->
+        <Grid Grid.Row="8" Margin="16,4,16,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="GPU Usage" FontSize="13" FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryForeground}"/>
+                <TextBlock x:Name="GpuCurrentLabel" FontSize="13"
+                           Foreground="{DynamicResource SecondaryForeground}" Margin="8,0,0,0"/>
+                <TextBlock x:Name="GpuTempLabel" FontSize="13"
+                           Foreground="{DynamicResource MutedForeground}" Margin="10,0,0,0"/>
+            </StackPanel>
+            <Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}"
+                    BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="4">
+                <Canvas x:Name="GpuCanvas" ClipToBounds="True" SizeChanged="Canvas_SizeChanged"/>
+            </Border>
+        </Grid>
+
     </Grid>
 </UserControl>

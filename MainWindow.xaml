@@ -13,48 +13,32 @@
 
     <Window.Resources>
 
-        <!-- Theme toggle button -->
-        <Style x:Key="ThemeToggleStyle" TargetType="RadioButton">
-            <Setter Property="Background"  Value="Transparent"/>
-            <Setter Property="Foreground"  Value="{DynamicResource ThemeButtonForeground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource ThemeButtonBorder}"/>
-            <Setter Property="Padding"     Value="11,5"/>
-            <Setter Property="FontSize"    Value="12"/>
-            <Setter Property="Cursor"      Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                Padding="{TemplateBinding Padding}">
-                            <TextBlock Text="{TemplateBinding Content}"
-                                       Foreground="{TemplateBinding Foreground}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource ThemeButtonActiveBg}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource ThemeButtonActiveFg}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
         <!-- DataGrid row -->
         <Style x:Key="ProcessRowStyle" TargetType="DataGridRow">
             <Setter Property="Background" Value="{DynamicResource SurfaceBackground}"/>
             <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}"/>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding IsNew}" Value="True">
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsNew}" Value="True"/>
+                        <Condition Binding="{Binding DataContext.HighlightProcesses, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="Background" Value="{DynamicResource NewProcessBackground}"/>
                     <Setter Property="Foreground" Value="{DynamicResource NewProcessForeground}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding IsTerminated}" Value="True">
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsTerminated}" Value="True"/>
+                        <Condition Binding="{Binding DataContext.HighlightProcesses, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="Background" Value="{DynamicResource TerminatedProcessBackground}"/>
                     <Setter Property="Foreground" Value="{DynamicResource TerminatedProcessForeground}"/>
+                </MultiDataTrigger>
+                <DataTrigger Binding="{Binding IsSpike}" Value="True">
+                    <Setter Property="Background" Value="#50FF2020"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSearchMatch}" Value="False">
+                    <Setter Property="Opacity" Value="0.25"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -186,9 +170,52 @@
     </Window.Resources>
 
     <Grid Background="{DynamicResource AppBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- Tab control fills the grid -->
-        <TabControl>
+        <!-- Menu bar -->
+        <Menu Grid.Row="0"
+              Background="#F0F0F0"
+              Foreground="#111111"
+              BorderBrush="#D0D0D0"
+              BorderThickness="0,0,0,1">
+            <MenuItem Header="_File">
+                <MenuItem Header="Export CSV" Click="ExportCsv_Click"/>
+                <Separator/>
+                <MenuItem Header="Exit" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Options">
+                <MenuItem Header="Refresh Rate">
+                    <MenuItem x:Name="Rate500"  Header="0.5 seconds" IsCheckable="True"                  Click="RefreshRate_Click" Tag="500"/>
+                    <MenuItem x:Name="Rate1000" Header="1 second"    IsCheckable="True" IsChecked="True" Click="RefreshRate_Click" Tag="1000"/>
+                    <MenuItem x:Name="Rate2000" Header="2 seconds"   IsCheckable="True"                  Click="RefreshRate_Click" Tag="2000"/>
+                    <MenuItem x:Name="Rate5000" Header="5 seconds"   IsCheckable="True"                  Click="RefreshRate_Click" Tag="5000"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem x:Name="PauseMonitoringItem"     Header="Pause Monitoring"        IsCheckable="True" Click="PauseMonitoring_Click"/>
+                <MenuItem x:Name="AlwaysOnTopItem"         Header="Always on Top"           IsCheckable="True" Click="AlwaysOnTop_Click"/>
+                <MenuItem x:Name="MinimizeToTrayItem"      Header="Minimize to Tray"        IsCheckable="True" Click="MinimizeToTray_Click"/>
+                <Separator/>
+                <MenuItem x:Name="HighlightNewTerminatedItem" Header="Highlight New/Terminated" IsCheckable="True" Click="HighlightNewTerminated_Click"/>
+                <Separator/>
+                <MenuItem x:Name="MonitorSpikesItem" Header="Monitor Spikes" IsCheckable="True" Click="MonitorSpikes_Click"/>
+                <MenuItem Header="Spike Thresholds..." Click="SpikeSettings_Click"/>
+                <Separator/>
+                <MenuItem x:Name="StartupWithWindowsItem" Header="Start with Windows" IsCheckable="True" Click="StartupWithWindows_Click"/>
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="Theme">
+                    <MenuItem x:Name="ThemeSystem" Header="System" IsCheckable="True" IsChecked="True" Click="ThemeSystem_Click"/>
+                    <MenuItem x:Name="ThemeLight"  Header="Light"  IsCheckable="True"                  Click="ThemeLight_Click"/>
+                    <MenuItem x:Name="ThemeDark"   Header="Dark"   IsCheckable="True"                  Click="ThemeDark_Click"/>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <!-- Tab control -->
+        <TabControl x:Name="MainTabControl" Grid.Row="1">
 
             <!-- ── Processes tab ── -->
             <TabItem Header="Processes">
@@ -205,10 +232,10 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Column="0" Margin="8">
-                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox x:Name="SearchBox"
+                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                      Background="{DynamicResource SearchBoxBackground}"
                                      Foreground="{DynamicResource PrimaryForeground}"
                                      BorderBrush="{DynamicResource AppBorderBrush}"
@@ -233,10 +260,6 @@
                                    Text="{Binding ProcessCount, StringFormat='{}{0} processes'}"
                                    Foreground="{DynamicResource SecondaryForeground}"
                                    VerticalAlignment="Center" Margin="0,0,12,0" FontSize="12"/>
-                        <Button Grid.Column="2" Content="Export CSV"
-                                Style="{StaticResource ToolbarButtonStyle}"
-                                VerticalAlignment="Center" Margin="0,0,8,0"
-                                Click="ExportCsv_Click"/>
                     </Grid>
 
                     <!-- Process table | Detail panel -->
@@ -255,6 +278,7 @@
                                   IsReadOnly="True"
                                   CanUserReorderColumns="False"
                                   Sorting="ProcessGrid_Sorting"
+                                  SelectionChanged="ProcessGrid_SelectionChanged"
                                   GridLinesVisibility="None"
                                   Background="{DynamicResource SurfaceBackground}"
                                   Foreground="{DynamicResource PrimaryForeground}"
@@ -336,8 +360,12 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="CPU %"       Binding="{Binding Vm.CpuPercent, StringFormat={}{0:F1}}" Width="80"  SortMemberPath="Vm.CpuPercent"/>
-                                <DataGridTextColumn Header="Memory (MB)" Binding="{Binding Vm.MemoryMB}"   Width="110" SortMemberPath="Vm.MemoryMB"/>
+                                <DataGridTextColumn x:Name="CpuColumn"  Header="CPU %"       Binding="{Binding Vm.CpuPercent, StringFormat={}{0:F1}}" Width="80"  SortMemberPath="Vm.CpuPercent"/>
+                                <DataGridTextColumn x:Name="MemColumn"  Header="Memory (MB)" Binding="{Binding Vm.MemoryMB}"          Width="110" SortMemberPath="Vm.MemoryMB"/>
+                                <DataGridTextColumn x:Name="DiskColumn" Header="Disk"         Binding="{Binding Vm.DiskBpsDisplay}"    Width="110" SortMemberPath="Vm.DiskReadBps"/>
+                                <DataGridTextColumn x:Name="NetColumn"  Header="Network"      Binding="{x:Null}"                       Width="145"/>
+                                <DataGridTextColumn Header="Threads"     Binding="{Binding Vm.ThreadCount}" Width="70"  SortMemberPath="Vm.ThreadCount"/>
+                                <DataGridTextColumn Header="Status"      Binding="{Binding Vm.Status}"      Width="110" SortMemberPath="Vm.Status"/>
                                 <DataGridTextColumn Header="Parent PID"  Binding="{Binding Vm.ParentPID}"  Width="95"  SortMemberPath="Vm.ParentPID"/>
                             </DataGrid.Columns>
                         </DataGrid>
@@ -369,18 +397,35 @@
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
                                                     </Grid.RowDefinitions>
-                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="PID"        Foreground="{DynamicResource SecondaryForeground}" Margin="0,4,12,4"/>
-                                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PID}"       Foreground="{DynamicResource PrimaryForeground}" Margin="0,4"/>
-                                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Parent PID" Foreground="{DynamicResource SecondaryForeground}" Margin="0,4,12,4"/>
-                                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ParentPID}" Foreground="{DynamicResource PrimaryForeground}" Margin="0,4"/>
-                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="CPU %"      Foreground="{DynamicResource SecondaryForeground}" Margin="0,4,12,4"/>
-                                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CpuPercent, StringFormat={}{0:F1}%}" Foreground="{DynamicResource PrimaryForeground}" Margin="0,4"/>
-                                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Memory"     Foreground="{DynamicResource SecondaryForeground}" Margin="0,4,12,4"/>
-                                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding MemoryMB, StringFormat={}{0} MB}" Foreground="{DynamicResource PrimaryForeground}" Margin="0,4"/>
-                                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Path"       Foreground="{DynamicResource SecondaryForeground}" Margin="0,4,12,4"/>
-                                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding FullPath}" Foreground="{DynamicResource PrimaryForeground}"
-                                                               TextWrapping="Wrap" Margin="0,4" FontSize="11"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="PID"        Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PID}"       Foreground="{DynamicResource PrimaryForeground}" Margin="0,3"/>
+                                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Parent PID" Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3"/>
+                                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ParentPID}" Foreground="{DynamicResource PrimaryForeground}" Margin="0,3"/>
+                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Status"     Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3"/>
+                                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Status}"    Foreground="{DynamicResource PrimaryForeground}" Margin="0,3"/>
+                                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="CPU %"      Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3"/>
+                                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CpuPercent, StringFormat={}{0:F1}%}" Foreground="{DynamicResource PrimaryForeground}" Margin="0,3"/>
+                                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Memory"     Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3"/>
+                                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding MemoryMB, StringFormat={}{0} MB}" Foreground="{DynamicResource PrimaryForeground}" Margin="0,3"/>
+                                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Threads"    Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3"/>
+                                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ThreadCount}" Foreground="{DynamicResource PrimaryForeground}" Margin="0,3"/>
+                                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Handles"    Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3"/>
+                                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding HandleCount}" Foreground="{DynamicResource PrimaryForeground}" Margin="0,3"/>
+                                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Started"    Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3"/>
+                                                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding StartTimeDisplay}"
+                                                               Foreground="{DynamicResource PrimaryForeground}" Margin="0,3" FontSize="11"/>
+                                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Path"       Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3"/>
+                                                    <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding FullPath}" Foreground="{DynamicResource PrimaryForeground}"
+                                                               TextWrapping="Wrap" Margin="0,3" FontSize="11"/>
+                                                    <TextBlock Grid.Row="9" Grid.Column="0" Text="Command"    Foreground="{DynamicResource SecondaryForeground}" Margin="0,3,12,3" VerticalAlignment="Top"/>
+                                                    <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding CommandLine}" Foreground="{DynamicResource MutedForeground}"
+                                                               TextWrapping="Wrap" Margin="0,3" FontSize="10"/>
                                                 </Grid>
                                             </StackPanel>
                                         </DataTemplate>
@@ -412,11 +457,32 @@
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock>
-                                        <Run Text="{Binding Timestamp, StringFormat='HH:mm:ss', Mode=OneWay}" Foreground="{DynamicResource MutedForeground}"/>
-                                        <Run Text="  "/>
-                                        <Run Text="{Binding Description, Mode=OneWay}"/>
-                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Timestamp, StringFormat='HH:mm:ss', Mode=OneWay}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource MutedForeground}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSpike}" Value="True">
+                                                            <Setter Property="Foreground" Value="#FF5555"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Description, Mode=OneWay}" Margin="8,0,0,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryForeground}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSpike}" Value="True">
+                                                            <Setter Property="Foreground" Value="#FF5555"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                             <ListBox.ItemContainerStyle>
@@ -445,25 +511,6 @@
 
         </TabControl>
 
-        <!-- Theme toggle overlaid on tab bar, top-right -->
-        <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,8,0"
-                BorderBrush="{DynamicResource ThemeButtonBorder}" BorderThickness="1"
-                CornerRadius="4" Background="{DynamicResource ThemeButtonBackground}">
-            <StackPanel Orientation="Horizontal">
-                <RadioButton x:Name="ThemeSystem" Content="System" GroupName="Theme" IsChecked="True"
-                             Style="{StaticResource ThemeToggleStyle}"
-                             BorderThickness="0,0,1,0" BorderBrush="{DynamicResource ThemeButtonBorder}"
-                             Checked="ThemeSystem_Checked"/>
-                <RadioButton x:Name="ThemeLight" Content="Light" GroupName="Theme"
-                             Style="{StaticResource ThemeToggleStyle}"
-                             BorderThickness="0,0,1,0" BorderBrush="{DynamicResource ThemeButtonBorder}"
-                             Checked="ThemeLight_Checked"/>
-                <RadioButton x:Name="ThemeDark" Content="Dark" GroupName="Theme"
-                             Style="{StaticResource ThemeToggleStyle}"
-                             BorderThickness="0"
-                             Checked="ThemeDark_Checked"/>
-            </StackPanel>
-        </Border>
 
     </Grid>
 </Window>
