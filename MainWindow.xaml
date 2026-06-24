@@ -331,9 +331,9 @@
                                 </Style>
                             </DataGrid.ColumnHeaderStyle>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="PID"         Binding="{Binding Vm.PID}"      Width="65"  SortMemberPath="Vm.PID"/>
+                                <DataGridTextColumn Header="PID"         Binding="{Binding Vm.PID}"      Width="55"  SortMemberPath="Vm.PID"/>
 
-                                <DataGridTemplateColumn Header="Name" Width="*" SortMemberPath="Vm.Name">
+                                <DataGridTemplateColumn Header="Name" Width="*" MinWidth="160" SortMemberPath="Vm.Name">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,0">
@@ -360,13 +360,13 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn x:Name="CpuColumn"  Header="CPU %"       Binding="{Binding Vm.CpuPercent, StringFormat={}{0:F1}}" Width="80"  SortMemberPath="Vm.CpuPercent"/>
-                                <DataGridTextColumn x:Name="MemColumn"  Header="Memory (MB)" Binding="{Binding Vm.MemoryMB}"          Width="110" SortMemberPath="Vm.MemoryMB"/>
-                                <DataGridTextColumn x:Name="DiskColumn" Header="Disk"         Binding="{Binding Vm.DiskBpsDisplay}"    Width="110" SortMemberPath="Vm.DiskReadBps"/>
-                                <DataGridTextColumn x:Name="NetColumn"  Header="Network"      Binding="{x:Null}"                       Width="145"/>
-                                <DataGridTextColumn Header="Threads"     Binding="{Binding Vm.ThreadCount}" Width="70"  SortMemberPath="Vm.ThreadCount"/>
-                                <DataGridTextColumn Header="Status"      Binding="{Binding Vm.Status}"      Width="110" SortMemberPath="Vm.Status"/>
-                                <DataGridTextColumn Header="Parent PID"  Binding="{Binding Vm.ParentPID}"  Width="95"  SortMemberPath="Vm.ParentPID"/>
+                                <DataGridTextColumn x:Name="CpuColumn"  Header="CPU %"       Binding="{Binding Vm.CpuPercent, StringFormat={}{0:F1}}" Width="85"  MinWidth="85"  SortMemberPath="Vm.CpuPercent"/>
+                                <DataGridTextColumn x:Name="MemColumn"  Header="Memory (MB)" Binding="{Binding Vm.MemoryMB}"          Width="112" MinWidth="112" SortMemberPath="Vm.MemoryMB"/>
+                                <DataGridTextColumn x:Name="DiskColumn" Header="Disk"         Binding="{Binding Vm.DiskBpsDisplay}"    Width="105" SortMemberPath="Vm.DiskReadBps"/>
+                                <DataGridTextColumn x:Name="NetColumn"  Header="Network"      Binding="{x:Null}"                       Width="65"/>
+                                <DataGridTextColumn Header="Threads"     Binding="{Binding Vm.ThreadCount}" Width="58"  SortMemberPath="Vm.ThreadCount"/>
+                                <DataGridTextColumn Header="Status"      Binding="{Binding Vm.Status}"      Width="80"  SortMemberPath="Vm.Status"/>
+                                <DataGridTextColumn Header="Parent PID"  Binding="{Binding Vm.ParentPID}"  Width="68"  SortMemberPath="Vm.ParentPID"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
