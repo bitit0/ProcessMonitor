@@ -78,9 +78,6 @@ dotnet publish ProcessMonitor.csproj -c Release -r win-x64 --self-contained true
 
 The output will be in `bin\Release\net10.0-windows\win-x64\publish\`.
 
-> **Note:** Always pass the `.csproj` filename explicitly. The WPF XAML compiler generates temporary `*_wpftmp.csproj` files during build that can confuse `dotnet` if the project is inferred from directory context.
-
-
 ## Dependencies
 
 | Package | Purpose |
